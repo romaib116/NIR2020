@@ -29,7 +29,7 @@ namespace FaceDetect
         }
 
 
-        public List<string> GetPhotosFromDB() //Выгрузить из базы данных список названий фотографий
+        public List<string> GetAllPhotos() //Выгрузить из базы данных список названий фотографий
         {
             OpenConnection();
             MySqlCommand cmd = new MySqlCommand("SELECT PhotoNames FROM `photonamestable`", GetConnection());
@@ -44,7 +44,7 @@ namespace FaceDetect
             return PhotosFromDataBase;
         }
 
-        public void SetGUIDForDB(Guid GUIDString, string PhotoName) //Обновление GUID для каждого пользователя
+        public void UpdateGUID(Guid GUIDString, string PhotoName) //Обновление GUID для каждого пользователя
         {
             OpenConnection();
             MySqlCommand cmd = new MySqlCommand($"UPDATE photonamestable SET GUID ='{GUIDString}' WHERE PhotoNames = '{PhotoName}'", GetConnection());
@@ -52,13 +52,13 @@ namespace FaceDetect
             CloseConnection();
         }
 
-        public string FindSimilarPhotoFromDB(Guid GUIDString) //Найти в базе данных человека по GUID номеру
+        public string FindPhotoByGuide(Guid GUIDString) //Найти в базе данных человека по GUID номеру
         {
             OpenConnection();
             MySqlCommand cmd = new MySqlCommand($"SELECT Name FROM `photonamestable` WHERE GUID = '{GUIDString}'", GetConnection());
-            string nameofphoto = cmd.ExecuteScalar().ToString();
+            string name = cmd.ExecuteScalar().ToString();
             CloseConnection();
-            return nameofphoto;
+            return name;
         }
     }
 }
