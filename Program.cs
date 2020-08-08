@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
-using MySql.Data.MySqlClient;
+
 
 namespace FaceDetect
 {
@@ -16,7 +13,7 @@ namespace FaceDetect
     {
         #region appConst
         const string IMAGE_BASE = @"C:\Users\Roman\Desktop\images\"; //Путь к фото
-        const string RECOGNITION_MODEL = RecognitionModel.Recognition02;
+        const string RECOGNITION_MODEL = RecognitionModel.Recognition02; //Модель распознавания лиц (всего их 2, выбрал самую новую)
 
         public static IFaceClient Authenticate(string endpoint, string key) /*Аутентификация клиента 
             создание экземпляра клиента с использованием конечной точки и ключа*/
@@ -56,35 +53,25 @@ namespace FaceDetect
         {
             Console.WriteLine("========FIND SIMILAR========");
             db DataBase = new db();
-            List<string> targetImageFileNames = DataBase.GetPhotosFromDB(); //База картинок
-
-            string sourceImageFileName = "example2.jpg"; //картинка которую сравниваем
-
+            List<string> DBImageFileNames = DataBase.GetPhotosFromDB(); //База данных названий картинок
+            string InputImageFileName = "example2.jpg"; //Картинка поступающая на ВХОД для сравнения с базой
             IList<Guid?> targetFaceIds = new List<Guid?>(); //Создание нового списка GUID для людей
-            foreach (var targetImageFileName in targetImageFileNames) //Создание GUID для каждой картинки из базы
+            foreach (var ImageFileName in DBImageFileNames) //Создание GUID для каждой картинки из базы
             {
-                var faces = await DetectFaceRecognize(client, $"{pathToBase}{targetImageFileName}", RECOGNITION_MODEL); //Запуск асинхр потока с поиском лиц
-                if (faces == null) //Если лиц нет то return
-                {
-                    return;
-                }
+                var faces = await DetectFaceRecognize(client, $"{pathToBase}{ImageFileName}", RECOGNITION_MODEL); //Запуск асинхр потока с поиском лиц
+                if (faces == null) { return; } //На случай, если лица не обнаружены
                 targetFaceIds.Add(faces[0].FaceId.Value); //Засунуть в список человека
-                DataBase.SetGUIDForDB(faces[0].FaceId.Value, targetImageFileName);
+                DataBase.SetGUIDForDB(faces[0].FaceId.Value, ImageFileName); //Обновить значение GUID для человека в стобце GUID
             }
-
             //Запуск асинхр потока с обнаружением лиц на ВХОДНОМ фото
-            IList<DetectedFace> detectedFaces = await DetectFaceRecognize(client, $"{pathToBase}{sourceImageFileName}", RECOGNITION_MODEL);
-
+            IList<DetectedFace> detectedFaces = await DetectFaceRecognize(client, $"{pathToBase}{InputImageFileName}", RECOGNITION_MODEL);
             // Поиск похожих лиц в списке GUID. Метод FindSimilarAsync (поиск похожих в асинхронном потоке. В метод передаем обнаруженное лицо
             //на ВХОДНОМ фото, и сравниваем с базой всех лиц)
             IList<SimilarFace> similarResults = await client.Face.FindSimilarAsync(detectedFaces[0].FaceId.Value, null, null, targetFaceIds);
-            
             foreach (var similarResult in similarResults)
             {
-
-                Console.WriteLine($"Face from {sourceImageFileName} & {DataBase.FindSimilarPhotoFromDB(similarResult.FaceId.Value)}(ID:{similarResult.FaceId.Value}) are similar with confidence: {similarResult.Confidence}.");
+                Console.WriteLine($"Face from {InputImageFileName} & {DataBase.FindSimilarPhotoFromDB(similarResult.FaceId.Value)}(ID:{similarResult.FaceId.Value}) are similar with confidence: {similarResult.Confidence}.");
             }
-            Console.WriteLine();
         }
 
 
