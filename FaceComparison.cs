@@ -33,8 +33,8 @@ namespace FaceDetect
                 }
                 else //благоприятный исход
                 {
-                    Console.WriteLine($"{detectedFaces.Count} face(s) detected from image `{Path.GetFileName(pathToBase)}`"); //вывести количество людей на фото
-                    foreach (var detectedFace in detectedFaces) { Console.WriteLine(detectedFace.FaceId.Value); } //вывести guid человека
+                    Console.WriteLine($"Face detected on `{Path.GetFileName(pathToBase)}`"); //вывести количество людей на фото
+                    foreach (var detectedFace in detectedFaces) { Console.WriteLine($"Assigned ID = {detectedFace.FaceId.Value}"); } //вывести guid человека
                     return detectedFaces.ToList();
                 }
             }
@@ -42,7 +42,7 @@ namespace FaceDetect
 
         public async Task FindSimilar(IFaceClient client, string pathToBase, string RECOGNITION_MODEL, string InputImageFileName) //Найти похожие лица
         {
-            Console.WriteLine("========FIND SIMILAR========");
+            Console.WriteLine("Start scan Database");
             db DataBase = new db();
             List<string> DBImageFileNames = DataBase.GetAllPhotos(); //База данных названий картинок
             IList<Guid?> targetFaceIds = new List<Guid?>(); //Создание нового списка GUID для людей
@@ -58,9 +58,10 @@ namespace FaceDetect
             // Поиск похожих лиц в списке GUID. Метод FindSimilarAsync (поиск похожих в асинхронном потоке. В метод передаем обнаруженное лицо
             //на ВХОДНОМ фото, и сравниваем с базой всех лиц)
             IList<SimilarFace> similarResults = await client.Face.FindSimilarAsync(detectedFaces[0].FaceId.Value, null, null, targetFaceIds);
+            
             foreach (var similarResult in similarResults)
             {
-                Console.WriteLine($"Face from {InputImageFileName} & {DataBase.FindPhotoByGuide(similarResult.FaceId.Value)}(ID:{similarResult.FaceId.Value}) are similar with confidence: {similarResult.Confidence}.");
+                Console.WriteLine($"Face from {InputImageFileName} & {DataBase.FindPhotoByGUID(similarResult.FaceId.Value)}(ID:{similarResult.FaceId.Value}) are similar with confidence: {similarResult.Confidence}.");
             }
         }
 

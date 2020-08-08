@@ -52,7 +52,7 @@ namespace FaceDetect
             CloseConnection();
         }
 
-        public string FindPhotoByGuide(Guid GUIDString) //Найти в базе данных человека по GUID номеру
+        public string FindPhotoByGUID(Guid GUIDString) //Найти в базе данных человека по GUID номеру
         {
             OpenConnection();
             MySqlCommand cmd = new MySqlCommand($"SELECT Name FROM `photonamestable` WHERE GUID = '{GUIDString}'", GetConnection());
