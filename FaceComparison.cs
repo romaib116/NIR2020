@@ -40,12 +40,11 @@ namespace FaceDetect
             }
         }
 
-        public async Task FindSimilar(IFaceClient client, string pathToBase, string RECOGNITION_MODEL) //Найти похожие лица
+        public async Task FindSimilar(IFaceClient client, string pathToBase, string RECOGNITION_MODEL, string InputImageFileName) //Найти похожие лица
         {
             Console.WriteLine("========FIND SIMILAR========");
             db DataBase = new db();
             List<string> DBImageFileNames = DataBase.GetAllPhotos(); //База данных названий картинок
-            string InputImageFileName = "example2.jpg"; //Картинка поступающая на ВХОД для сравнения с базой
             IList<Guid?> targetFaceIds = new List<Guid?>(); //Создание нового списка GUID для людей
             foreach (var ImageFileName in DBImageFileNames) //Создание GUID для каждой картинки из базы
             {
