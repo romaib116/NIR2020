@@ -19,7 +19,6 @@ namespace FaceDetect
             var Face = new FaceComparison();
             var client = Face.Authenticate(ENDPOINT, SUBSCRIPTION_KEY);
             Face.FindSimilar(client, IMAGE_BASE, RECOGNITION_MODEL, InputImageFileName).Wait(); 
-
         }
     }
 }

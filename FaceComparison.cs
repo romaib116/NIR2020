@@ -58,10 +58,16 @@ namespace FaceDetect
             // Поиск похожих лиц в списке GUID. Метод FindSimilarAsync (поиск похожих в асинхронном потоке. В метод передаем обнаруженное лицо
             //на ВХОДНОМ фото, и сравниваем с базой всех лиц)
             IList<SimilarFace> similarResults = await client.Face.FindSimilarAsync(detectedFaces[0].FaceId.Value, null, null, targetFaceIds);
-            
-            foreach (var similarResult in similarResults)
+            if (similarResults.Count!=0)
             {
-                Console.WriteLine($"Face from {InputImageFileName} & {DataBase.FindPhotoByGUID(similarResult.FaceId.Value)}(ID:{similarResult.FaceId.Value}) are similar with confidence: {similarResult.Confidence}.");
+                foreach (var similarResult in similarResults)
+                {
+                    Console.WriteLine($"Face from {InputImageFileName} & {DataBase.FindPhotoByGUID(similarResult.FaceId.Value)}(ID:{similarResult.FaceId.Value}) are similar with confidence: {similarResult.Confidence}.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("[Error] no matches found");
             }
         }
 
