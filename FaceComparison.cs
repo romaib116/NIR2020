@@ -15,8 +15,9 @@ namespace FaceDetect
             создание экземпляра клиента с использованием конечной точки и ключа*/
         { return new FaceClient(new ApiKeyServiceClientCredentials(key)) { Endpoint = endpoint }; }
 
-        private async Task<List<DetectedFace>> DetectFaceRecognize(IFaceClient faceClient, string pathToBase, string RECOGNITION_MODEL) //Подсчет
-                                                                                                                                               //количества лиц на фото и вывод их ID
+
+
+        private async Task<List<DetectedFace>> DetectFaceRecognize(IFaceClient faceClient, string pathToBase, string RECOGNITION_MODEL) //Подсчет количества лиц на фото и вывод их ID
         {
             using (FileStream stream = new FileStream(pathToBase, FileMode.Open))
             {
@@ -39,6 +40,8 @@ namespace FaceDetect
                 }
             }
         }
+
+
 
         public async Task FindSimilar(IFaceClient client, string pathToBase, string RECOGNITION_MODEL, string InputImageFileName) //Найти похожие лица
         {
@@ -77,7 +80,5 @@ namespace FaceDetect
                 Console.WriteLine("[Return error]");
             }
         }
-
-
     }
 }
