@@ -55,7 +55,7 @@ namespace FaceDetect
         public string FindPhotoByGUID(Guid GUIDString) //Найти в базе данных человека по GUID номеру
         {
             OpenConnection();
-            MySqlCommand cmd = new MySqlCommand($"SELECT Name FROM `photonamestable` WHERE GUID = '{GUIDString}'", GetConnection());
+            MySqlCommand cmd = new MySqlCommand($"SELECT PhotoNames FROM `photonamestable` WHERE GUID = '{GUIDString}'", GetConnection());
             string name = cmd.ExecuteScalar().ToString();
             CloseConnection();
             return name;

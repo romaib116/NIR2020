@@ -2,6 +2,7 @@
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
 
+
 namespace FaceDetect
 {
     class Program
@@ -18,7 +19,8 @@ namespace FaceDetect
             var InputImageFileName = "example2.jpg"; //Картинка поступающая на ВХОД для сравнения с базой
             var Face = new FaceComparison();
             var client = Face.Authenticate(ENDPOINT, SUBSCRIPTION_KEY);
-            Face.FindSimilar(client, IMAGE_BASE, RECOGNITION_MODEL, InputImageFileName).Wait(); 
+            Face.FindSimilar(client, IMAGE_BASE, RECOGNITION_MODEL, InputImageFileName).Wait();
+            Console.WriteLine(Face.FaceKey);
         }
     }
 }

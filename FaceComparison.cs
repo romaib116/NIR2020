@@ -1,47 +1,70 @@
 ﻿using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
+using MySql.Data.MySqlClient.Memcached;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 
 namespace FaceDetect
 {
-    class FaceComparison : db
+    class FaceComparison
     {
-
         public IFaceClient Authenticate(string endpoint, string key) /*Аутентификация клиента 
             создание экземпляра клиента с использованием конечной точки и ключа*/
         { return new FaceClient(new ApiKeyServiceClientCredentials(key)) { Endpoint = endpoint }; }
 
+        public int FaceKey { get; private set; }
 
-
-        private async Task<List<DetectedFace>> DetectFaceRecognize(IFaceClient faceClient, string pathToBase, string RECOGNITION_MODEL) //Подсчет количества лиц на фото и вывод их ID
+        private async Task<List<DetectedFace>> DetectFaceRecognize(IFaceClient faceClient, string InputImageFileName, string RECOGNITION_MODEL) //Подсчет количества лиц на фото и вывод их ID
         {
-            using (FileStream stream = new FileStream(pathToBase, FileMode.Open))
+            using (FileStream stream = new FileStream(InputImageFileName, FileMode.Open))
             {
                 IList<DetectedFace> detectedFaces = await faceClient.Face.DetectWithStreamAsync(stream, recognitionModel: RECOGNITION_MODEL);
                 if (detectedFaces == null || detectedFaces.Count == 0) //если на фото нет лиц - ошибка
                 {
-                    Console.WriteLine($"[Error] No face detected from image `{pathToBase}`.");
+                    Console.WriteLine($"[Error] No face detected from image `{InputImageFileName}`.");
                     return null;
                 }
                 else if (detectedFaces.Count > 1) //если на фото больше одного лица - их слишком много
                 {
-                    Console.WriteLine($"[Error] Too more faces from image`{pathToBase}`.");
+                    Console.WriteLine($"[Error] Too more faces from image`{InputImageFileName}`.");
                     return null;
                 }
                 else //благоприятный исход
                 {
-                    Console.WriteLine($"Face detected on `{Path.GetFileName(pathToBase)}`"); //вывести количество людей на фото
-                    foreach (var detectedFace in detectedFaces) { Console.WriteLine($"Assigned ID = {detectedFace.FaceId.Value}"); } //вывести guid человека
+                    Console.WriteLine($"Face detected on `{Path.GetFileName(InputImageFileName)}`"); //Человек найден на /Изображение/
+                //    foreach (var detectedFace in detectedFaces) {Console.WriteLine($"Assigned ID = {detectedFace.FaceId.Value}"); } //вывести guid человека
                     return detectedFaces.ToList();
                 }
             }
         }
 
-
+        private async Task<int> GetKey(IFaceClient faceClient, string InputImageFileName, string RECOGNITION_MODEL) //Метод для вычисления ключа у необходимого изображения из БД
+        {
+            double Key = 0;
+            using (FileStream stream = new FileStream(InputImageFileName, FileMode.Open))
+            {
+                IList<DetectedFace> detectedFaces = await faceClient.Face.DetectWithStreamAsync(stream, returnFaceLandmarks: true, recognitionModel: RECOGNITION_MODEL);
+                foreach (var detectedFace in detectedFaces)
+                {
+                    double[] attributes  = new double[] //Набор атрибутов, по которым в будущем вычисляется ключ
+{
+                            detectedFace.FaceLandmarks.EyebrowLeftInner.X,
+                            detectedFace.FaceLandmarks.EyebrowRightInner.X,
+                            detectedFace.FaceLandmarks.EyeLeftBottom.X,
+                            detectedFace.FaceLandmarks.EyeRightBottom.X
+};
+                    for (int i = 0; i < attributes.Length; i++)
+                    {
+                        Key += attributes[i];
+                    }
+                }
+            }
+            return Key.GetHashCode();
+        }
 
         public async Task FindSimilar(IFaceClient client, string pathToBase, string RECOGNITION_MODEL, string InputImageFileName) //Найти похожие лица
         {
@@ -68,6 +91,8 @@ namespace FaceDetect
                     foreach (var similarResult in similarResults)
                     {
                         Console.WriteLine($"Face from {InputImageFileName} & {DataBase.FindPhotoByGUID(similarResult.FaceId.Value)}(ID:{similarResult.FaceId.Value}) are similar with confidence: {similarResult.Confidence}.");
+                        //Человек найден, можно сделать SET для FaceKey ---- Получаем ключ для человека из БД
+                        FaceKey = await GetKey(client, $"{pathToBase}{DataBase.FindPhotoByGUID(similarResult.FaceId.Value)}", RECOGNITION_MODEL);
                     }
                 }
                 else
