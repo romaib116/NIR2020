@@ -52,13 +52,22 @@ namespace FaceDetect
             CloseConnection();
         }
 
-        public string FindPhotoByGUID(Guid GUIDString) //Найти в базе данных человека по GUID номеру
+        public string FindPhotoNameByGUID(Guid GUIDString) //Найти в базе данных название фото по GUID номеру
         {
             OpenConnection();
             MySqlCommand cmd = new MySqlCommand($"SELECT PhotoNames FROM `photonamestable` WHERE GUID = '{GUIDString}'", GetConnection());
-            string name = cmd.ExecuteScalar().ToString();
+            string PhotoName = cmd.ExecuteScalar().ToString();
             CloseConnection();
-            return name;
+            return PhotoName;
+        }
+
+        public string FindNameByGUID(Guid GUIDString) //Найти в базе данных название фото по GUID номеру
+        {
+            OpenConnection();
+            MySqlCommand cmd = new MySqlCommand($"SELECT Name FROM `photonamestable` WHERE GUID = '{GUIDString}'", GetConnection());
+            string Name = cmd.ExecuteScalar().ToString();
+            CloseConnection();
+            return Name;
         }
     }
 }
