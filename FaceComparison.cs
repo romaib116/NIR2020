@@ -44,7 +44,7 @@ namespace FaceDetect
                         Console.WriteLine($"Face from {InputImageFileName} & {DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)} (ID:{SimilarResult.FaceId.Value}) are similar with confidence: {SimilarResult.Confidence}.");
                         //Человек найден, можно сделать SET для FaceKey ---- Получаем ключ для человека из БД
                         FaceKey = await CalculateKey(Client, $"{PathToBase}{DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)}", RecognitionModel);
-                        FaceName = DataBase.FindNameByGUID(SimilarResult.FaceId.Value);
+                        FaceName = DataBase.FindNameByGUID(SimilarResult.FaceId.Value); //Найдем имя человека по свежему ID из БД
                     }
                 }
                 else
