@@ -53,7 +53,7 @@ namespace FaceDetect
                     }
                     if (FaceKey == null || FaceName == null) //Если подходящее лицо с совпадением 90% не найдено (вдруг на вход поступит слишком "плохое" фото), и совпадение составит лишь 70-90%
                     {
-                        Console.WriteLine("Sorry, we cant identify your face, retry");
+                        Console.WriteLine("[Error] We cant identify your face, please retry");
                     }
                 }
                 else //Если не найдено ни одно даже близко похожее совпадение с входным фото
