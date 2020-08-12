@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace FaceDetect
@@ -86,6 +87,7 @@ namespace FaceDetect
         private async Task<int> CalculateKey(IFaceClient Client, string ResultImageFileName, string RecognitionModel) //Метод для вычисления ключа у необходимого изображения из БД
         {
             double Key = 0;
+            SHA512 Hash512 = new SHA512Managed();
             using (FileStream stream = new FileStream(ResultImageFileName, FileMode.Open))
             {
                 IList<DetectedFace> DetectedFaces = await Client.Face.DetectWithStreamAsync(stream, returnFaceLandmarks: true, recognitionModel: RecognitionModel);
@@ -104,7 +106,7 @@ namespace FaceDetect
                     }
                 }
             }
-            return Key.GetHashCode();
+            return BitConverter.ToInt32(Hash512.ComputeHash(BitConverter.GetBytes(Key)));
         }
     }
 }
