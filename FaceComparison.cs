@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FaceDetect
@@ -15,7 +16,7 @@ namespace FaceDetect
             создание экземпляра клиента с использованием конечной точки и ключа*/
         { return new FaceClient(new ApiKeyServiceClientCredentials(key)) { Endpoint = endpoint }; }
 
-        public int FaceKey { get; private set; }
+        public string FaceKey { get; private set; }
         public string FaceName { get; private set; }
 
 
@@ -42,13 +43,20 @@ namespace FaceDetect
                 {
                     foreach (var SimilarResult in SimilarResults)
                     {
-                        Console.WriteLine($"Face from {InputImageFileName} & {DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)} (ID:{SimilarResult.FaceId.Value}) are similar with confidence: {SimilarResult.Confidence}.");
-                        //Человек найден, можно сделать SET для FaceKey ---- Получаем ключ для человека из БД
-                        FaceKey = await CalculateKey(Client, $"{PathToBase}{DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)}", RecognitionModel);
-                        FaceName = DataBase.FindNameByGUID(SimilarResult.FaceId.Value); //Найдем имя человека по свежему ID из БД
+                        if (SimilarResult.Confidence >= 0.9) //Если совпадение больше 90% (Поставил потому, что с моим братом по фото совпадение аж 70% !!!)
+                        {
+                            Console.WriteLine($"Face from {InputImageFileName} & {DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)} (ID:{SimilarResult.FaceId.Value}) are similar with confidence: {SimilarResult.Confidence}.");
+                            //Человек найден, можно сделать SET для FaceKey ---- Получаем ключ для человека из БД
+                            FaceKey = await CalculateKey(Client, $"{PathToBase}{DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)}", RecognitionModel);
+                            FaceName = DataBase.FindNameByGUID(SimilarResult.FaceId.Value); //Найдем имя человека по свежему ID из БД
+                        }
+                    }
+                    if (FaceKey == null || FaceName == null) //Если подходящее лицо с совпадением 90% не найдено (вдруг на вход поступит слишком "плохое" фото), и совпадение составит лишь 70-90%
+                    {
+                        Console.WriteLine("Sorry, we cant identify your face, retry");
                     }
                 }
-                else
+                else //Если не найдено ни одно даже близко похожее совпадение с входным фото
                 {
                     Console.WriteLine("[Error] no matches found");
                 }
@@ -84,7 +92,7 @@ namespace FaceDetect
             }
         }
 
-        private async Task<int> CalculateKey(IFaceClient Client, string ResultImageFileName, string RecognitionModel) //Метод для вычисления ключа у необходимого изображения из БД
+        private async Task<string> CalculateKey(IFaceClient Client, string ResultImageFileName, string RecognitionModel) //Метод для вычисления ключа у необходимого изображения из БД
         {
             double Key = 0;
             SHA512 Hash512 = new SHA512Managed();
@@ -106,7 +114,8 @@ namespace FaceDetect
                     }
                 }
             }
-            return BitConverter.ToInt32(Hash512.ComputeHash(BitConverter.GetBytes(Key)));
+            ;
+            return BitConverter.ToString(Hash512.ComputeHash(BitConverter.GetBytes(Key)));
         }
     }
 }
