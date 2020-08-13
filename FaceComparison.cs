@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace FaceDetect
+namespace EncryptDecryptFilesByFace
 {
     class FaceComparison
     {
@@ -16,8 +15,9 @@ namespace FaceDetect
             создание экземпляра клиента с использованием конечной точки и ключа*/
         { return new FaceClient(new ApiKeyServiceClientCredentials(key)) { Endpoint = endpoint }; }
 
-        public string FaceKey { get; private set; }
         public string FaceName { get; private set; }
+        public byte[] FaceKey { get; private set; }
+        public byte[] FaceIV { get; private set; }
 
 
         public async Task FindSimilar(IFaceClient Client, string PathToBase, string RecognitionModel, string InputImageFileName) //Найти похожие лица
@@ -49,9 +49,10 @@ namespace FaceDetect
                             //Человек найден, можно сделать SET для FaceKey ---- Получаем ключ для человека из БД
                             FaceKey = await CalculateKey(Client, $"{PathToBase}{DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)}", RecognitionModel);
                             FaceName = DataBase.FindNameByGUID(SimilarResult.FaceId.Value); //Найдем имя человека по свежему ID из БД
+                            FaceIV = await CalculateIV(Client, $"{PathToBase}{DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)}", RecognitionModel);
                         }
                     }
-                    if (FaceKey == null || FaceName == null) //Если подходящее лицо с совпадением 90% не найдено (вдруг на вход поступит слишком "плохое" фото), и совпадение составит лишь 70-90%
+                    if (FaceKey == null || FaceName == null || FaceIV == null) //Если подходящее лицо с совпадением 90% не найдено (вдруг на вход поступит слишком "плохое" фото), и совпадение составит лишь 70-90%
                     {
                         Console.WriteLine("[Error] We cant identify your face, please retry");
                     }
@@ -92,10 +93,9 @@ namespace FaceDetect
             }
         }
 
-        private async Task<string> CalculateKey(IFaceClient Client, string ResultImageFileName, string RecognitionModel) //Метод для вычисления ключа у необходимого изображения из БД
+        private async Task<byte[]> CalculateKey(IFaceClient Client, string ResultImageFileName, string RecognitionModel) //Метод для вычисления ключа у необходимого изображения из БД
         {
             double Key = 0;
-            SHA512 Hash512 = new SHA512Managed();
             using (FileStream stream = new FileStream(ResultImageFileName, FileMode.Open))
             {
                 IList<DetectedFace> DetectedFaces = await Client.Face.DetectWithStreamAsync(stream, returnFaceLandmarks: true, recognitionModel: RecognitionModel);
@@ -114,8 +114,31 @@ namespace FaceDetect
                     }
                 }
             }
-            ;
-            return BitConverter.ToString(Hash512.ComputeHash(BitConverter.GetBytes(Key)));
+            return BitConverter.GetBytes(Key);
+        }
+
+        private async Task<byte[]> CalculateIV(IFaceClient Client, string ResultImageFileName, string RecognitionModel) //Метод для вычисления InititVector у необходимого изображения из БД
+        {
+            double IV = 0;
+            using (FileStream stream = new FileStream(ResultImageFileName, FileMode.Open))
+            {
+                IList<DetectedFace> DetectedFaces = await Client.Face.DetectWithStreamAsync(stream, returnFaceLandmarks: true, recognitionModel: RecognitionModel);
+                foreach (var DetectedFace in DetectedFaces)
+                {
+                    double[] Attributes = new double[] //Набор атрибутов, по которым в будущем вычисляется ключ
+{
+                            DetectedFace.FaceLandmarks.EyebrowLeftInner.Y,
+                            DetectedFace.FaceLandmarks.EyebrowRightInner.Y,
+                            DetectedFace.FaceLandmarks.EyeLeftBottom.Y,
+                            DetectedFace.FaceLandmarks.EyeRightBottom.Y
+};
+                    for (int i = 0; i < Attributes.Length; i++)
+                    {
+                        IV += Attributes[i];
+                    }
+                }
+            }
+            return BitConverter.GetBytes(IV);
         }
     }
 }

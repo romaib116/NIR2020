@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace FaceDetect
+namespace EncryptDecryptFilesByFace
 {
     class db
     {
