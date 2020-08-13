@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EncryptDecryptFilesByFace": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\Roman\\source\\repos\\FaceDetect"
+    }
+  }
+}

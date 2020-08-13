@@ -4,6 +4,14 @@ using System.Collections.Generic;
 
 namespace EncryptDecryptFilesByFace
 {
+    /// <summary>
+    /// DB structure photonamesbase
+    /// Id (primary key)
+    /// PhotoNames (name of photo with expansion)
+    /// GUID (Program auto set this num) can be null
+    /// Name (name of person)
+    /// </summary>
+
     class db
     {
         MySqlConnection connection = new MySqlConnection("server=localhost;port=3306;username=root;password=root;database=photonamesbase");
