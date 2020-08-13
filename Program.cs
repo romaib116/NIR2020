@@ -27,6 +27,7 @@ namespace EncryptDecryptFilesByFace
             {
                 var File = new CryptographicOperation(InputFile, Face.FaceKey, Face.FaceIV);
                 File.Encrypt();
+                File.Decrypt();
             }
             else
             {

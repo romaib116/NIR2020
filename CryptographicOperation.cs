@@ -33,11 +33,8 @@ namespace EncryptDecryptFilesByFace
             try
             {
                 FileStream myStream = new FileStream(FilePath, FileMode.Open);
-                var array = new byte[myStream.Length];
-                myStream.Read(array,0,array.Length);
                 Aes aes = Aes.Create();
                 CryptoStream cryptStream = new CryptoStream(myStream, aes.CreateEncryptor(SessionKey, SessionIV), CryptoStreamMode.Write);
-                cryptStream.Write(array, 0, array.Length);
                 cryptStream.Close();
                 myStream.Close();
 
@@ -48,7 +45,6 @@ namespace EncryptDecryptFilesByFace
                 throw;
             }
         }
-
 
     }
 }
