@@ -28,6 +28,7 @@ namespace EncryptDecryptFilesByFace
                 var File = new CryptographicOperation(InputFile, Face.FaceKey, Face.FaceIV);
                 File.Encrypt();
                 File.Decrypt();
+                Console.WriteLine($"File ({InputFile}) successfully Encrypted & Decrypted");
             }
             else
             {
