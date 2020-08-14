@@ -77,5 +77,16 @@ namespace EncryptDecryptFilesByFace
             CloseConnection();
             return Name;
         }
+
+        /* Штука парсящая ваш DataSet
+         * 
+         * public void ParsePhotoToDB(string PhotoName, string Name, int GUID)
+         {
+             OpenConnection();
+             MySqlCommand cmd = new MySqlCommand($"INSERT photonamestable(PhotoNames, Name, GUID) VALUES ('{PhotoName}','{Name}',{GUID})", GetConnection());
+             cmd.ExecuteNonQuery();
+             CloseConnection();
+         }
+        */
     }
 }

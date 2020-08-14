@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
@@ -6,6 +7,7 @@ using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
 namespace EncryptDecryptFilesByFace
 {
+
     class Program
     {
         static string ProjectDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -15,12 +17,32 @@ namespace EncryptDecryptFilesByFace
         static string IMAGE_BASE = Path.GetFullPath(Path.Combine(ProjectDirectory,@"..\..\..\Images\")); //Путь к фото
 
 
+
+        /*Парсер DataSet в DB
+         * 
+         * 
+        static void Parser(string pathToFolder)
+        {
+            var FilesOnFolder = Directory.GetFiles(pathToFolder);
+            var database = new db();
+            var i = 0;
+            foreach (var photo in FilesOnFolder)
+            {
+                i++;
+                database.ParsePhotoToDB(Path.GetFileName(photo), Path.GetFileName(photo).Substring(0,5), i);
+            }
+        }
+        */
+
+
+
         static void Main(string[] args)
         {
             var InputImageFileName = "example2.jpg"; //Картинка поступающая на ВХОД для сравнения с базой
             var InputFile = Path.GetFullPath(Path.Combine(ProjectDirectory, @"..\..\..\TestFiles\test.txt")); //Файл который надо шифровать/расшифровывать
             var Face = new FaceComparison();
             var Client = Face.Authenticate(ENDPOINT, SUBSCRIPTION_KEY);
+
             Face.FindSimilar(Client, IMAGE_BASE, RECOGNITION_MODEL, InputImageFileName).Wait();
             Console.WriteLine($"Hello {Face.FaceName}!");
 

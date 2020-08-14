@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace EncryptDecryptFilesByFace
@@ -18,6 +19,41 @@ namespace EncryptDecryptFilesByFace
         public byte[] FaceKey { get; private set; }
         public byte[] FaceIV { get; private set; }
 
+
+        /* Вычисление пары Key, IV и парс в текстовик 
+         * 
+         * 
+        public async Task testKeyPairs(IFaceClient Client, string PathToBase, string RecognitionModel, string File)
+        {
+            Console.WriteLine("Start test scan Database");
+            SHA512 Hash512 = new SHA512Managed();
+            db DataBase = new db();
+            List<string> DBImageFileNames = DataBase.GetAllPhotos();
+            IList<Guid?> TargetFaceIds = new List<Guid?>();
+            foreach (var ImageFileName in DBImageFileNames) //Создание ID для каждой картинки из базы
+            {
+                var Faces = await DetectFaceRecognize(Client, $"{PathToBase}{ImageFileName}", RecognitionModel); //Запуск асинхр потока с поиском лиц
+                if (Faces == null) { return; } //На случай, если лица не обнаружены
+                TargetFaceIds.Add(Faces[0].FaceId.Value); //Засунуть в список человека
+                DataBase.UpdateGUID(Faces[0].FaceId.Value, ImageFileName); //Обновить значение ID для человека в стобце GUID БД
+                var testKey = await CalculateKey(Client, $"{PathToBase}{DataBase.FindPhotoNameByGUID(Faces[0].FaceId.Value)}", RecognitionModel);
+                var testIV = await CalculateIV(Client, $"{PathToBase}{DataBase.FindPhotoNameByGUID(Faces[0].FaceId.Value)}", RecognitionModel);
+                var tempKey = Hash512.ComputeHash(testKey);
+                var tempIV = Hash512.ComputeHash(testIV);
+                testKey = new byte[16];
+                testIV = new byte[16];
+                for (int i = 0; i < 16; i++) //Забираем первые 16 байт в SessionKey, SessionIV из их SHA512 хеша
+                {
+                    testKey[i] = tempKey[i];
+                    testIV[i] = tempIV[i];
+                }
+                using (StreamWriter sw = new StreamWriter(File, true, System.Text.Encoding.Default))
+                {
+                    sw.WriteLine($"{ImageFileName} \r\n Key: {BitConverter.ToString(testKey)} \r\n IV: {BitConverter.ToString(testIV)}");
+                }
+            }
+        }
+        */
 
         public async Task FindSimilar(IFaceClient Client, string PathToBase, string RecognitionModel, string InputImageFileName) //Найти похожие лица
         {
@@ -49,6 +85,8 @@ namespace EncryptDecryptFilesByFace
                             FaceKey = await CalculateKey(Client, $"{PathToBase}{DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)}", RecognitionModel);
                             FaceName = DataBase.FindNameByGUID(SimilarResult.FaceId.Value); //Найдем имя человека по свежему ID из БД
                             FaceIV = await CalculateIV(Client, $"{PathToBase}{DataBase.FindPhotoNameByGUID(SimilarResult.FaceId.Value)}", RecognitionModel);
+
+
                         }
                     }
                     if (FaceKey == null || FaceName == null || FaceIV == null) //Если подходящее лицо с совпадением 90% не найдено (вдруг на вход поступит слишком "плохое" фото), и совпадение составит лишь 70-90%
@@ -105,7 +143,11 @@ namespace EncryptDecryptFilesByFace
                             DetectedFace.FaceLandmarks.EyebrowLeftInner.X,
                             DetectedFace.FaceLandmarks.EyebrowRightInner.X,
                             DetectedFace.FaceLandmarks.EyeLeftBottom.X,
-                            DetectedFace.FaceLandmarks.EyeRightBottom.X
+                            DetectedFace.FaceLandmarks.EyeRightBottom.X,
+                            DetectedFace.FaceLandmarks.UpperLipTop.X,
+                            DetectedFace.FaceLandmarks.UpperLipBottom.X,
+                            DetectedFace.FaceLandmarks.MouthLeft.X,
+                            DetectedFace.FaceLandmarks.PupilRight.X
 };
                     for (int i = 0; i < Attributes.Length; i++)
                     {
@@ -129,7 +171,11 @@ namespace EncryptDecryptFilesByFace
                             DetectedFace.FaceLandmarks.EyebrowLeftInner.Y,
                             DetectedFace.FaceLandmarks.EyebrowRightInner.Y,
                             DetectedFace.FaceLandmarks.EyeLeftBottom.Y,
-                            DetectedFace.FaceLandmarks.EyeRightBottom.Y
+                            DetectedFace.FaceLandmarks.EyeRightBottom.Y,
+                            DetectedFace.FaceLandmarks.UpperLipTop.Y,
+                            DetectedFace.FaceLandmarks.UpperLipBottom.Y,
+                            DetectedFace.FaceLandmarks.MouthLeft.Y,
+                            DetectedFace.FaceLandmarks.PupilRight.Y
 };
                     for (int i = 0; i < Attributes.Length; i++)
                     {
