@@ -93,7 +93,7 @@ namespace EncryptDecryptFilesByFace
                 fs.Read(EncryptedBytes, 0, EncryptedBytes.Length);
             }
 
-            //Расшифровываем файл
+            //Расшифровываем файл в [] DecryptedBytes
             using (MemoryStream ms = new MemoryStream(EncryptedBytes))
             {
                 using (CryptoStream cs = new CryptoStream(ms, decrypt, CryptoStreamMode.Read))
