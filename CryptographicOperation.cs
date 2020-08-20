@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Channels;
 
 namespace EncryptDecryptFilesByFace
 {
@@ -16,6 +17,13 @@ namespace EncryptDecryptFilesByFace
 
         private byte[] DecryptedBytes { get; set; }
 
+
+        /// <summary>
+        /// Конструктор который вычисляет пару Key,IV; Получает название файла который надо зашифровать/расшифровать
+        /// </summary>
+        /// <param name="file"> Файл который надо зашифровать/расшифровать </param>
+        /// <param name="key"> Ключ </param>
+        /// <param name="iv"> InitializationVector </param>
         public CryptographicOperation(string file, byte[] key, byte[] iv)
         {
             SHA512 Hash512 = new SHA512Managed();
@@ -33,7 +41,9 @@ namespace EncryptDecryptFilesByFace
         }
 
 
-        //Метод шифрования
+        /// <summary>
+        /// Шифрование
+        /// </summary>
         public void Encrypt()
         {
             Aes aes = Aes.Create();
@@ -68,8 +78,9 @@ namespace EncryptDecryptFilesByFace
             }
         }
 
-
-        //Метод расшифрования
+        /// <summary>
+        /// Расшифрование
+        /// </summary>
         public void Decrypt()
         {
             Aes aes = Aes.Create();

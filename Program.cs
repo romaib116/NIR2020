@@ -10,6 +10,9 @@ namespace EncryptDecryptFilesByFace
 
     class Program
     {
+        /// <summary>
+        /// FACE_SUBSCRIPTION_KEY, FACE_ENDPOINT получаем из аккаунта Azure
+        /// </summary>
         static string ProjectDirectory = AppDomain.CurrentDomain.BaseDirectory;
         static string SUBSCRIPTION_KEY = Environment.GetEnvironmentVariable("FACE_SUBSCRIPTION_KEY");
         static string ENDPOINT = Environment.GetEnvironmentVariable("FACE_ENDPOINT");
@@ -17,10 +20,12 @@ namespace EncryptDecryptFilesByFace
         static string IMAGE_BASE = Path.GetFullPath(Path.Combine(ProjectDirectory,@"..\..\..\Images\")); //Путь к фото
 
 
-
-        /*Парсер DataSet в DB
-         * 
-         * 
+        /// <summary>
+        /// На вход в метод поступает папка
+        /// Метод вызывает метод объекта БД ParsePhotoToDB
+        /// Происходит копирование названий всех фото в БД
+        /// </summary>
+        /*
         static void Parser(string pathToFolder)
         {
             var FilesOnFolder = Directory.GetFiles(pathToFolder);
@@ -56,7 +61,7 @@ namespace EncryptDecryptFilesByFace
             }
             else
             {
-                Console.WriteLine("Return error, check input data for encrypt/decrypt file");
+                throw new Exception("[Error] Check input data for encrypt/decrypt file");
             }
 
         }
