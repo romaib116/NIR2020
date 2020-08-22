@@ -41,7 +41,7 @@ namespace EncryptDecryptFilesByFace
             Console.WriteLine("Start test scan Database");
             SHA512 Hash512 = new SHA512Managed();
             db DataBase = new db();
-            List<string> DBImageFileNames = DataBase.GetAllPhotos();
+            IList<string> DBImageFileNames = DataBase.GetAllPhotos();
             IList<Guid?> TargetFaceIds = new List<Guid?>();
             foreach (var ImageFileName in DBImageFileNames) //Создание ID для каждой картинки из базы
             {
@@ -82,7 +82,7 @@ namespace EncryptDecryptFilesByFace
             //Начинаем сканирование базы данных
             Console.WriteLine("Start scan Database");
             db DataBase = new db();
-            List<string> DBImageFileNames = DataBase.GetAllPhotos(); //База данных названий картинок
+            IList<string> DBImageFileNames = DataBase.GetAllPhotos(); //База данных названий картинок
             IList<Guid?> TargetFaceIds = new List<Guid?>(); //Создание нового списка ID для людей
             foreach (var ImageFileName in DBImageFileNames) //Создание ID для каждой картинки из базы
             {
