@@ -58,7 +58,7 @@ namespace EncryptDecryptFilesByFace
         /// Метод получающий названия всех фотографий из БД
         /// </summary>
         /// <returns> Список(List) названий фотографий</returns>
-        public IList<string> GetAllPhotos()
+        public List<string> GetAllPhotos()
         {
             OpenConnection();
             MySqlCommand cmd = new MySqlCommand("SELECT PhotoNames FROM `photonamestable`", GetConnection());
